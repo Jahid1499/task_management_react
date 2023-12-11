@@ -1,10 +1,12 @@
-import { BrowserRouter as Route, Router, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import useAuthCheck from "./hooks/useAuthCheck";
 import PublicRoute from "./components/PublicRoute";
 import PrivateRoute from "./components/PrivateRoute";
 import Task from "./pages/Task";
 import Team from "./pages/Team";
 import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+import Registration from "./pages/Registration";
 
 function App() {
   const authChecked = useAuthCheck();
@@ -12,7 +14,7 @@ function App() {
   return !authChecked ? (
     <div>Checking authentication....</div>
   ) : (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route
           path="/"
@@ -22,9 +24,16 @@ function App() {
             </PublicRoute>
           }
         />
-
         <Route
-          path="/projects"
+          path="/registration"
+          element={
+            <PublicRoute>
+              <Registration />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/task"
           element={
             <PrivateRoute>
               <Task />
@@ -39,8 +48,14 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
+    // <Router>
+    //   <Routes>
+
+    //   </Routes>
+    // </Router>
   );
 }
 
