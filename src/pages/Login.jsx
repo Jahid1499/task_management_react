@@ -17,7 +17,7 @@ const Login = () => {
       setError(responseError.data);
     }
     if (data?.accessToken && data?.user) {
-      navigate("/projects");
+      navigate("/task");
     }
   }, [data, responseError, navigate]);
 
