@@ -20,7 +20,7 @@ const Registration = () => {
     if (responseError?.data) {
       setError(responseError.data);
     }
-    if (data?.accessToken && data?.user) {
+    if (data?.token && data?.user) {
       navigate("/inbox");
     }
   }, [data, responseError, navigate]);

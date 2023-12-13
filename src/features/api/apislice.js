@@ -4,9 +4,9 @@ import { userLoggedOut } from "../auth/authSlice";
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.REACT_APP_API_URL,
   prepareHeaders: async (headers, { getState, endpoint }) => {
-    const token = getState()?.auth?.accessToken;
+    const token = getState()?.auth?.token;
     if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
+      headers.set("Authorization", `${token}`);
     }
     return headers;
   },
