@@ -23,6 +23,6 @@ export const apiSlice = createApi({
     }
     return result;
   },
-  tagTypes: ["projects", "team"],
+  tagTypes: ["project", "task"],
   endpoints: (builder) => ({}),
 });
