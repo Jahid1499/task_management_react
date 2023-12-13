@@ -2,11 +2,11 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import useAuthCheck from "./hooks/useAuthCheck";
 import PublicRoute from "./components/PublicRoute";
 import PrivateRoute from "./components/PrivateRoute";
-import Task from "./pages/Task";
-import Team from "./pages/Team";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Registration from "./pages/Registration";
+import Project from "./pages/Project";
+import Task from "./pages/Task";
 
 function App() {
   const authChecked = useAuthCheck();
@@ -33,7 +33,7 @@ function App() {
           }
         />
         <Route
-          path="/task"
+          path="/tasks"
           element={
             <PrivateRoute>
               <Task />
@@ -41,10 +41,10 @@ function App() {
           }
         />
         <Route
-          path="/teams"
+          path="/projects"
           element={
             <PrivateRoute>
-              <Team />
+              <Project />
             </PrivateRoute>
           }
         />
