@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
-import { useGetUserQuery } from "../../features/users/usersApi";
+import {
+  useGetSingleProjectQuery,
+  useGetUserProjectsQuery,
+} from "../../features/project/projectApi";
 import { format, parseISO } from "date-fns";
+
 const init = {
   title: "",
+  status: "pending",
   description: "",
-  color: "",
-  status: "active",
   startDate: "",
-  participants: "",
+  endDate: "",
+  project_id: "",
+  assign: "",
 };
 
 const Modal = ({
@@ -18,32 +23,26 @@ const Modal = ({
 }) => {
   const [formData, setFormData] = useState({ ...init });
   const [error, setError] = useState({ ...init });
-  const { title, description, color, status, startDate } = formData;
-  const [participants, setParticepents] = useState([]);
+  const { title, description, color, status, startDate, endDate, project_id } =
+    formData;
+  const [assign, setAssign] = useState([]);
+  const [projectId, setProjectId] = useState(-1);
 
   const {
-    data: userData,
+    data: usersResult,
+    refetch: refetchSingleProject,
+    isLoading: singleProjectIsLoading,
+    isError: singleProjectIsError,
+  } = useGetSingleProjectQuery(projectId, { skip: projectId === -1 });
+
+  const {
+    data: userProjectData,
     isLoading,
     isError,
     error: userErro,
-  } = useGetUserQuery();
-
-  const updateFormData = () => {
-    if (update && editData !== null) {
-      const { title, description, color, status, startDate, participants } =
-        editData;
-      setFormData({
-        title: title,
-        description,
-        color,
-        status,
-        startDate: format(parseISO(startDate), "yyyy-MM-dd"),
-        participants,
-      });
-      setParticepents([...participants.split(",")]);
-    }
-  };
-  const userList = userData?.users;
+  } = useGetUserProjectsQuery();
+  const projectList = userProjectData?.projects;
+  const singleProjectParticipentList = usersResult?.users;
 
   const onChangeHandler = (e) => {
     const { name, value } = e.target;
@@ -51,20 +50,45 @@ const Modal = ({
       ...formData,
       [name]: value,
     });
-  };
-  const handleChange = (e) => {};
 
-  useEffect(() => {
-    const particepentString = participants.map((p) => p).join(",");
-    setFormData({
-      ...formData,
-      participants: particepentString,
-    });
-  }, [participants]);
+    if (name === "project_id") {
+      setProjectId(value);
+    }
+  };
+
+  const updateFormData = () => {
+    if (update && editData !== null) {
+      const {
+        title,
+        description,
+        status,
+        startDate,
+        endDate,
+        project_id,
+        users,
+      } = editData;
+
+      const assignString = users?.map((item) => item.id).join(",");
+      setFormData({
+        title,
+        description,
+        status,
+        startDate: format(parseISO(startDate), "yyyy-MM-dd"),
+        endDate: format(parseISO(endDate), "yyyy-MM-dd"),
+        project_id,
+        assign: assignString,
+      });
+      setProjectId(project_id);
+      setAssign([...assignString.split(",")]);
+    }
+  };
+
+  const handleChange = (e) => {};
 
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    const { title, description, startDate, participants } = formData;
+    const { title, description, startDate, endDate, project_id, assign } =
+      formData;
     if (title === "") {
       setError((prev) => ({
         ...prev,
@@ -89,18 +113,6 @@ const Modal = ({
       }));
     }
 
-    if (color === "") {
-      setError((prev) => ({
-        ...prev,
-        color: "Color is required",
-      }));
-    } else {
-      setError((prev) => ({
-        ...prev,
-        color: "",
-      }));
-    }
-
     if (startDate === "") {
       setError((prev) => ({
         ...prev,
@@ -113,15 +125,39 @@ const Modal = ({
       }));
     }
 
-    if (participants === "") {
+    if (endDate === "") {
       setError((prev) => ({
         ...prev,
-        participants: "Particepant is required",
+        endDate: "End Date is required",
       }));
     } else {
       setError((prev) => ({
         ...prev,
-        participants: "",
+        endDate: "",
+      }));
+    }
+
+    if (project_id === "") {
+      setError((prev) => ({
+        ...prev,
+        project_id: "Project is required",
+      }));
+    } else {
+      setError((prev) => ({
+        ...prev,
+        project_id: "",
+      }));
+    }
+
+    if (assign === "") {
+      setError((prev) => ({
+        ...prev,
+        assign: "Please assign minimum one user",
+      }));
+    } else {
+      setError((prev) => ({
+        ...prev,
+        assign: "",
       }));
     }
 
@@ -130,36 +166,54 @@ const Modal = ({
       description !== "" &&
       color !== "" &&
       startDate !== "" &&
-      participants.length !== 0
+      endDate !== "" &&
+      assign !== "" &&
+      project_id !== 0
     ) {
       submitHandler(formData);
       setError({ ...init });
-      setParticepents([]);
       setFormData({ ...init });
+      setAssign([]);
+      setProjectId(-1);
     }
   };
 
   const handleClose = () => {
     setFormData({ ...init });
     setError({ ...init });
+    setProjectId(-1);
     modalHandler();
   };
 
   const handleSelect = (e) => {
     const { value } = e.target;
-    if (participants.includes(value)) {
-      const updateParticepentsr = participants.filter(
+    if (assign.includes(value)) {
+      const updateAssign = assign.filter(
         (particepent) => particepent !== value
       );
-      setParticepents([...updateParticepentsr]);
+      setAssign([...updateAssign]);
     } else {
-      setParticepents([...participants, value]);
+      setAssign([...assign, value]);
     }
   };
+
+  useEffect(() => {
+    const assignString = assign?.map((p) => p).join(",");
+    setFormData({
+      ...formData,
+      assign: assignString,
+    });
+  }, [assign]);
+
+  useEffect(() => {
+    if (projectId !== -1) {
+      refetchSingleProject();
+    }
+  }, [projectId, refetchSingleProject]);
+
   useEffect(() => {
     updateFormData();
   }, []);
-
   return (
     <>
       <div
@@ -196,7 +250,7 @@ const Modal = ({
 
             <div className="py-6 px-6 lg:px-8">
               <h3 className="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-                Project form
+                Task form
               </h3>
               <form className="space-y-6" onSubmit={onSubmitHandler}>
                 <div>
@@ -225,7 +279,7 @@ const Modal = ({
                 <div>
                   <label
                     htmlFor="description"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:textDescription -gray-300"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                   >
                     Description <span className="text-red-400">*</span>
                   </label>
@@ -233,8 +287,8 @@ const Modal = ({
                     id="description"
                     onChange={(e) => onChangeHandler(e)}
                     value={description}
+                    placeholder="Please write task description"
                     name="description"
-                    placeholder="Please write project description"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                   ></textarea>
                   {error?.description && (
@@ -246,57 +300,64 @@ const Modal = ({
 
                 <div>
                   <label
-                    htmlFor="color"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    htmlFor="projectId"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400"
                   >
-                    Color <span className="text-red-400">*</span>{" "}
-                    <span className="text-gray-400 text-xs">
-                      (Ex: yellow, lime, green, emerald, teal, sky, blue,
-                      indigo, violet, purple, fuchsia, rose)
-                    </span>
+                    Chose project
                   </label>
-                  <input
-                    type="text"
-                    name="color"
+                  <select
                     onChange={(e) => onChangeHandler(e)}
-                    value={color}
-                    id="color"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    placeholder="Please enter color name"
-                  />
-                  {error?.color && (
+                    id="projectId"
+                    name="project_id"
+                    value={project_id}
+                    className="bg-gray-50 border focus:border-blue-500 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  >
+                    <option disabled value="">
+                      Select one
+                    </option>
+                    {projectList &&
+                      projectList.length > 0 &&
+                      projectList.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.title}
+                        </option>
+                      ))}
+                  </select>
+                  {error?.assign && (
                     <label className="text-xs text-red-400">
-                      {error?.color}
+                      {error?.assign}
+                    </label>
+                  )}
+
+                  {projectList?.length === 0 && (
+                    <label className="text-xs text-red-400">
+                      Project not found
                     </label>
                   )}
                 </div>
 
                 <div>
                   <label
-                    htmlFor="participants"
+                    htmlFor="assign"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-400"
                   >
-                    Chose user
+                    Chose particepent
                   </label>
                   <select
-                    value={participants}
+                    value={assign}
                     multiple
                     onClick={(e) => handleSelect(e)}
                     onChange={(e) => handleChange(e)}
-                    id="participants"
+                    id="assign"
                     className="bg-gray-50 border focus:border-blue-500 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   >
                     <option disabled value="">
                       Select one
                     </option>
-                    {userList &&
-                      userList.length > 0 &&
-                      userList.map((user) => (
-                        <option
-                          key={user.id}
-                          // selected={participants.includes(user.email)}
-                          value={user.email}
-                        >
+                    {singleProjectParticipentList &&
+                      singleProjectParticipentList.length > 0 &&
+                      singleProjectParticipentList.map((user) => (
+                        <option key={user.id} value={user.id}>
                           {user.name}
                         </option>
                       ))}
@@ -320,23 +381,34 @@ const Modal = ({
                       <input
                         type="radio"
                         name="status"
-                        value="active"
-                        checked={status === "active"}
+                        value="pending"
+                        checked={status === "pending"}
                         onChange={(e) => onChangeHandler(e)}
                         className="mr-1 text-blue-500"
                       />
-                      Active
+                      Pending
                     </label>
                     <label>
                       <input
                         type="radio"
                         name="status"
-                        value="inactive"
-                        checked={status === "inactive"}
+                        value="ongoing"
+                        checked={status === "ongoing"}
                         onChange={(e) => onChangeHandler(e)}
                         className="mr-1 text-red-500"
                       />
-                      Inactive
+                      Ongoing
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="status"
+                        value="done"
+                        checked={status === "done"}
+                        onChange={(e) => onChangeHandler(e)}
+                        className="mr-1 text-blue-500"
+                      />
+                      Done
                     </label>
                   </div>
                 </div>
@@ -360,6 +432,29 @@ const Modal = ({
                   {error?.startDate && (
                     <label className="text-xs text-red-400">
                       {error?.startDate}
+                    </label>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="endDate"
+                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  >
+                    Start date <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    onChange={(e) => onChangeHandler(e)}
+                    value={endDate}
+                    id="endDate"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    placeholder="Please select a start date"
+                  />
+                  {error?.endDate && (
+                    <label className="text-xs text-red-400">
+                      {error?.endDate}
                     </label>
                   )}
                 </div>
