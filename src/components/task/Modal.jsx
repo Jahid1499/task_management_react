@@ -181,6 +181,7 @@ const Modal = ({
   const handleClose = () => {
     setFormData({ ...init });
     setError({ ...init });
+    setAssign([]);
     setProjectId(-1);
     modalHandler();
   };
@@ -307,6 +308,7 @@ const Modal = ({
                   </label>
                   <select
                     onChange={(e) => onChangeHandler(e)}
+                    disabled={update}
                     id="projectId"
                     name="project_id"
                     value={project_id}

@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { userLoggedOut } from "../../features/auth/authSlice";
 import logoImage from "./../../assets/images/logo.png";
+import { apiSlice } from "../../features/api/apislice";
 
 const Template = ({ children, searchOption = false }) => {
   const { pathname } = useLocation();
@@ -15,6 +16,7 @@ const Template = ({ children, searchOption = false }) => {
   const logout = () => {
     dispatch(userLoggedOut());
     localStorage.clear();
+    dispatch(apiSlice.util.resetApiState());
     navigate("/");
   };
 
@@ -71,7 +73,7 @@ const Template = ({ children, searchOption = false }) => {
           <button className="flex items-center justify-center w-8 h-8 ml-auto overflow-hidden rounded-full cursor-pointer">
             <img src={user.avatar} alt="" />
           </button>
-
+          <span className="mx-3">{user.name}</span>
           <button onClick={logout}>
             <span className="flex items-center mx-4 h-6 px-6 py-4 text-sm font-semibold text-indigo-700 bg-indigo-100 rounded-full">
               Logout

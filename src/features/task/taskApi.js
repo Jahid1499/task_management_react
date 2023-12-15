@@ -28,10 +28,11 @@ export const projectApi = apiSlice.injectEndpoints({
     }),
     changeStatus: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/tasks/${id}`,
+        url: `user/${id}/tasks`,
         method: "PATCH",
         body: data,
       }),
+      invalidatesTags: ["task"],
     }),
     deleteTask: builder.mutation({
       query: (id) => ({

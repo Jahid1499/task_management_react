@@ -15,7 +15,7 @@ export const projectApi = apiSlice.injectEndpoints({
     }),
 
     getUserProjects: builder.query({
-      query: () => `/user/projects`,
+      query: () => `/projects`,
       providesTags: ["userProject"],
     }),
 

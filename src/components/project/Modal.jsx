@@ -142,6 +142,7 @@ const Modal = ({
   const handleClose = () => {
     setFormData({ ...init });
     setError({ ...init });
+    setParticepents([]);
     modalHandler();
   };
 

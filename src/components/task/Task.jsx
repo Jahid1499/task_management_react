@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import swal from "sweetalert";
 import {
+  useChangeStatusMutation,
   useDeleteTaskMutation,
   useUpdateTaskMutation,
 } from "../../features/task/taskApi";
 import { format } from "date-fns";
 import Modal from "./Modal";
+import UpdateModal from "./UpdateModal";
 
 const Task = ({
   id,
@@ -22,8 +24,13 @@ const Task = ({
 }) => {
   const { user: loggedInUser } = useSelector((state) => state.auth) || {};
   const [isOpen, setIsOpen] = useState(false);
+  const [updateModalIsOpen, setUpdateModalIsOpen] = useState(false);
   const [deleteTask, { isSuccess: deleteTaskSuccess }] =
     useDeleteTaskMutation() || {};
+
+  const [changeStatus, { isSuccess: changeStatusSuccess }] =
+    useChangeStatusMutation() || {};
+
   const [
     updateTask,
     {
@@ -46,8 +53,16 @@ const Task = ({
     }
   };
 
+  const updateStatusHandler = () => {
+    setUpdateModalIsOpen((prev) => !prev);
+  };
+
   const modalHandler = () => {
     setIsOpen((prev) => !prev);
+  };
+
+  const updateModalHandler = () => {
+    setUpdateModalIsOpen((prev) => !prev);
   };
 
   const submitHandler = (data) => {
@@ -71,6 +86,16 @@ const Task = ({
         startDate,
         status,
         title,
+      },
+    });
+  };
+
+  const changeStatusHandler = (data) => {
+    updateModalHandler();
+    changeStatus({
+      id,
+      data: {
+        status: data,
       },
     });
   };
@@ -107,7 +132,7 @@ const Task = ({
 
           <button
             onClick={() => deleteHandler(id)}
-            className="absolute top-0 right-6 flex items-center justify-center hidden w-5 h-5 mt-3 mr-2 text-gray-500 rounded hover:bg-gray-200 hover:text-gray-700 group-hover:flex"
+            className="absolute top-0 right-6 flex items-center justify-center w-5 h-5 mt-3 mr-2 text-gray-500 rounded hover:bg-gray-200 hover:text-gray-700 group-hover:flex"
           >
             <svg
               className="w-4 h-4 fill-current"
@@ -125,12 +150,29 @@ const Task = ({
           </button>
         </>
       )}
+      {loggedInUser.role === "user" && (
+        <>
+          <button
+            onClick={() => updateStatusHandler()}
+            className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 mt-3 mr-2 text-gray-500 rounded hover:bg-gray-200 hover:text-gray-700 group-hover:flex"
+          >
+            <svg
+              className="w-4 h-4 fill-current"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+            </svg>
+          </button>
+        </>
+      )}
       <span
         className={`flex items-center capitalize h-6 px-3 text-xs font-semibold text-green-500 bg-green-100 rounded-full`}
       >
         {title}
       </span>
-      <h4 className="mx-1 text-sm font-medium capitalize">{project.title}</h4>
+      <h4 className="mx-1 text-sm font-medium capitalize">{project?.title}</h4>
       <p className="mx-1 text-sm font-small">{description}</p>
 
       <button
@@ -233,6 +275,16 @@ const Task = ({
             submitHandler={submitHandler}
             update={true}
             editData={editData}
+          />
+        )}
+
+        {updateModalIsOpen && (
+          <UpdateModal
+            submitHandler={changeStatusHandler}
+            updateModalHandler={updateModalHandler}
+            status={status}
+            title={title}
+            description={description}
           />
         )}
       </div>
