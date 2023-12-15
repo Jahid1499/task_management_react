@@ -197,7 +197,7 @@ const Project = ({
       <div className="flex items-center w-full mt-3 text-xs font-medium text-gray-400">
         <div className="flex items-center">
           <svg
-            className="w-4 h-4 text-gray-300 fill-current"
+            className="w-4 h-4 text-gray-300 fill-current absolute bottom-5"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -208,7 +208,7 @@ const Project = ({
               clipRule="evenodd"
             />
           </svg>
-          <span className="ml-1 leading-none">
+          <span className="ml-1 absolute bottom-5 leading-none">
             {format(new Date(startDate), "do LLL yyyy")}
           </span>
         </div>

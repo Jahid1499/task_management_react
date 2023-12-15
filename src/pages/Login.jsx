@@ -8,7 +8,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const [login, { data, isLoading, error: responseError }] = useLoginMutation();
+  const [login, { data, isLoading, error: responseError }] =
+    useLoginMutation() || {};
 
   const navigate = useNavigate();
 
