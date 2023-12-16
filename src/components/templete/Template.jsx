@@ -1,8 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { userLoggedOut } from "../../features/auth/authSlice";
 import logoImage from "./../../assets/images/logo.png";
 import { apiSlice } from "../../features/api/apislice";
+import logo from "../../assets/images/logo.png";
 
 const Template = ({ children, searchOption = false }) => {
   const { pathname } = useLocation();
@@ -40,7 +41,13 @@ const Template = ({ children, searchOption = false }) => {
     <>
       <div className="flex flex-col w-screen h-screen overflow-auto text-gray-700 bg-gradient-to-tr from-blue-200 via-indigo-200 to-pink-200">
         <div className="flex items-center flex-shrink-0 w-full h-16 px-10 bg-white bg-opacity-75">
-          <img alt="logo" src={logoImage} className="h-10" />
+          <Link to="/tasks">
+            <img
+              className="mx-auto h-12 w-auto"
+              src={logo}
+              alt="Learn with sumit"
+            />
+          </Link>
 
           {searchOption && (
             <input
@@ -85,7 +92,8 @@ const Template = ({ children, searchOption = false }) => {
 
         <a
           className="fixed bottom-0 right-0 flex items-center justify-center h-8 pl-1 pr-2 mb-6 mr-4 text-blue-100 bg-indigo-600 rounded-full shadow-lg hover:bg-blue-600"
-          href="www.apexdmit.com"
+          href="http://www.apexdmit.com"
+          rel="noreferrer"
           target="_blank"
         >
           <div className="flex items-center justify-center w-6 h-6 bg-blue-500 rounded-full">

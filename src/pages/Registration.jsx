@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useRegisterMutation } from "../features/auth/authApi";
 import { Link, useNavigate } from "react-router-dom";
 import Error from "../components/ui/Error";
+import swal from "sweetalert";
+import { BeatLoader } from "react-spinners";
+import logo from "../assets/images/logo.png";
 
 const Registration = () => {
   const [name, setName] = useState("");
@@ -41,19 +44,23 @@ const Registration = () => {
     }
   };
 
+  if (responseError) {
+    swal("Oops!", `${responseError?.error}`, "error");
+  }
+
   return (
     <div className="flex flex-col w-screen h-screen overflow-auto text-gray-700 bg-gradient-to-tr from-blue-200 via-indigo-200 to-pink-200">
       <div className="grid place-items-center h-screen bg-[#F9FAFB">
         <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-md w-full space-y-8">
             <div>
-              {/* <Link to="/">
+              <Link to="/">
                 <img
                   className="mx-auto h-12 w-auto"
-                  src={logoImage}
+                  src={logo}
                   alt="Learn with sumit"
                 />
-              </Link> */}
+              </Link>
               <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                 Create your account
               </h2>
@@ -156,7 +163,7 @@ const Registration = () => {
                   disabled={isLoading}
                 >
                   <span className="absolute left-0 inset-y-0 flex items-center pl-3"></span>
-                  Sign up
+                  {isLoading ? <BeatLoader color="#fff" /> : "Sign Up"}
                 </button>
               </div>
             </form>
